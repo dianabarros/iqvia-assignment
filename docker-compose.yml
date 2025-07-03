@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  raw_db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: raw_data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - raw_data:/var/lib/postgresql/data
+
+  refined_db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: refined_data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - refined_data:/var/lib/postgresql/data
+
+  reader:
+    build: .
+    command: python -u ./src/reader.py
+    volumes:
+      - ./data:/data
+    depends_on:
+      raw_db:
+        condition: service_healthy
+    environment:
+      - RAW_DB_NAME=raw_data
+      - RAW_DB_USER=postgres
+      - RAW_DB_PASSWORD=postgres
+      - RAW_DB_HOST=raw_db
+      - RAW_DB_PORT=5432
+
+  handler:
+    build: .
+    command: python -u ./src/handler.py
+    depends_on:
+      raw_db:
+        condition: service_healthy
+      refined_db:
+        condition: service_healthy
+      reader:
+        condition: service_completed_successfully
+    environment:
+      - RAW_DB_NAME=raw_data
+      - RAW_DB_USER=postgres
+      - RAW_DB_PASSWORD=postgres
+      - RAW_DB_HOST=raw_db
+      - RAW_DB_PORT=5432
+      - REFINED_DB_NAME=refined_data
+      - REFINED_DB_USER=postgres
+      - REFINED_DB_PASSWORD=postgres
+      - REFINED_DB_HOST=refined_db
+      - REFINED_DB_PORT=5432
+
+volumes:
+  raw_data:
+  refined_data:
+  pgadmin_data:
