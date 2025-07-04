@@ -9,10 +9,11 @@ from models.raw_patient_row import RawPatientRow
 from models.raw_patient import RawPatient
 from models.raw_allergy_row import RawAllergyRow
 from models.raw_allergy import RawAllergy
+from processing.data_treatment import AllergyProcessor
 
 from settings import settings
 
-def process_and_store_data():
+def main():
     raw_conn = None
     refined_conn = None
     raw_cur = None
@@ -37,6 +38,8 @@ def process_and_store_data():
         refined_cur = refined_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         raw_conn.autocommit = False
         refined_conn.autocommit = False
+
+        allergy_processor = AllergyProcessor()
 
         # # Ensure target tables exist
         # refined_cur.execute('''
@@ -97,20 +100,25 @@ def process_and_store_data():
             # TODO
         batch_size = 1000  # TODO Define a batch size for processing
         for offset in range(0, len(allergies), batch_size):
+            allergy_models_rows_batch = []
             allergy_models_batch = []
             for row in allergies[offset:offset + batch_size]:
                 try:
+                    raw_allergy = RawAllergy(**row['data'])
                     raw_allergy_row = RawAllergyRow(
                         id=row['id'],
-                        data=RawAllergy(**row['data']),
+                        data=raw_allergy,
                         ack=row['ack'],
                         created_at=row['created_at']
                     )
-                    allergy_models_batch.append(raw_allergy_row)
+                    allergy_models_batch.append(raw_allergy)
+                    allergy_models_rows_batch.append(raw_allergy_row)
                     print(f"Processing allergy: {raw_allergy_row.id}")
                 except Exception as e:
                     print(f"Skipping malformed allergy {row['id']} row: {e}")
                     continue
+
+                # allergy_processor.process_allergies(allergy_models_batch)
                     # TODO: transform
                     # TODO: insert into refined table
                     # TODO: update ack status in raw table
@@ -136,4 +144,4 @@ def process_and_store_data():
             refined_conn.close()
 
 if __name__ == '__main__':
-    process_and_store_data()
+    main()

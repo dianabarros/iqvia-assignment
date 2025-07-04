@@ -14,9 +14,9 @@ def read_and_store_data():
     try:
         conn = psycopg2.connect(
             dbname=settings.RAW_DB_NAME,
-            user=os.settings.RAW_DB_USER,
+            user=settings.RAW_DB_USER,
             password=settings.RAW_DB_PASSWORD,
-            host=os.settings.RAW_DB_HOST,
+            host=settings.RAW_DB_HOST,
             port=settings.RAW_DB_PORT
         )
         cur = conn.cursor()

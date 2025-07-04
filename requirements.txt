@@ -1,8 +1,11 @@
-psycopg2-binary==2.9.9
-python-dotenv==1.0.0
+annotated-types==0.7.0
+greenlet==3.2.3
 ndjson==0.3.1
+psycopg2-binary==2.9.9
 pydantic==2.11.7
+pydantic-settings==2.10.1
 pydantic_core==2.33.2
-greenlet==3.2.3 
-sqlalchemy==2.0.41
-pydantic-settings-2.10.1
+python-dotenv==1.0.0
+SQLAlchemy==2.0.41
+typing-inspection==0.4.1
+typing_extensions==4.14.0

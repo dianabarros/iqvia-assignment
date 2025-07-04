@@ -6,11 +6,10 @@ from sqlalchemy import (
     ForeignKey,
     DateTime
 )
-from sqlalchemy.orm import relationship, declarative_base
+from sqlalchemy.orm import relationship
+from models.tables import RefinedBase
 
-Base = declarative_base()
-
-class AllergyCodes(Base):
+class AllergyCodes(RefinedBase):
     __tablename__ = "allergy_codes"
     id = Column(Integer, primary_key=True, autoincrement=True)
     system = Column(String, nullable=False)
@@ -18,7 +17,7 @@ class AllergyCodes(Base):
     display = Column(String, nullable=False)
     events = relationship("AllergyEvent", back_populates="code_rel")
 
-class AllergyEvents(Base):
+class AllergyEvents(RefinedBase):
     __tablename__ = "allergy_events"
     uuid = Column(UUID(as_uuid=True), primary_key=True)
     patient_uuid = Column(UUID(as_uuid=True), nullable=False)

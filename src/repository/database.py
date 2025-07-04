@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 BaseModel = declarative_base()
 
 class SessionDatabase:
-    def __init__(self, username, password, host, database) -> None:
+    def __init__(self, basemodel, username, password, host, database) -> None:
         url_object = URL.create(
-            "postgresql+pg8000",
+            "postgresql+psycopg2",
             username=username,
             password=password,
             host=host,
@@ -16,6 +16,7 @@ class SessionDatabase:
         )
 
         self.engine = create_engine(url_object)
+        basemodel.metadata.create_all(self.engine)
         self.session = sessionmaker(bind=self.engine)
         print("Database connection opened")
 

@@ -1,9 +1,12 @@
 from contextlib import contextmanager
-from repository.database import SessionDatabase, get_db_session, get_session_context, get_notificator_session_context
+
+from models.tables import RefinedBase
+from repository.database import SessionDatabase, get_db_session
 
 from settings import settings
 
 sessionmaker = SessionDatabase(
+    basemodel=RefinedBase,
     username=settings.REFINED_DB_USER,
     password=settings.REFINED_DB_PASSWORD,
     host=settings.REFINED_DB_HOST,

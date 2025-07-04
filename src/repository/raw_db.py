@@ -1,9 +1,11 @@
 from contextlib import contextmanager
-from repository.database import SessionDatabase, get_db_session, get_session_context, get_notificator_session_context
+from models.tables import RawBase
+from repository.database import SessionDatabase, get_db_session
 
 from settings import settings
 
 sessionmaker = SessionDatabase(
+    basemodel=RawBase,
     username=settings.RAW_DB_USER,
     password=settings.RAW_DB_PASSWORD,
     host=settings.RAW_DB_HOST,
