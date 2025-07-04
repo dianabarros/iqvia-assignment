@@ -1,10 +1,10 @@
 from pydantic import BaseModel, model_validator
-from typing import Union, get_type_hints
+from typing import Union, get_type_hints, Optional
 
-class AllergyCode(BaseModel):
-    id: int
-    system_id: int
+class AllergyCodeSchema(BaseModel):
+    system: str
     code: str
+    display: str
 
     class Config:
         extra = "forbid"

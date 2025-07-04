@@ -9,12 +9,12 @@ class AllergyCategory(str, Enum):
     PET_ALLERGY = "pet_allergy"
     ENVIRONMENT = "environment"
 
-class AllergyEvent(BaseModel):
+class AllergyEventSchema(BaseModel):
     uuid: UUID
     patient_uuid: UUID
     category: Optional[AllergyCategory] = None
     criticality: str
-    code_id: int
+    code_id: Optional[int] = None
     recorded_date: datetime
 
     class Config:
@@ -50,7 +50,9 @@ class AllergyEvent(BaseModel):
                 return datetime.fromisoformat(v)
             except ValueError:
                 raise ValueError(f"Invalid date format: {v}")
-        return v
+        elif isinstance(v, datetime):
+            return v
+        raise ValueError(f"Invalid date type: {type(v)}. Expected str or datetime.")
     
     @field_validator('criticality', mode='before')
     @classmethod
