@@ -1,0 +1,15 @@
+from contextlib import contextmanager
+from repository.database import SessionDatabase, get_db_session, get_session_context, get_notificator_session_context
+
+from settings import settings
+
+sessionmaker = SessionDatabase(
+    username=settings.REFINED_DB_USER,
+    password=settings.REFINED_DB_PASSWORD,
+    host=settings.REFINED_DB_HOST,
+    database=settings.REFINED_DB_NAME
+)
+
+@contextmanager
+def get_refined_db_session(commit_on_exception: bool = False):
+    return get_db_session(sessionmaker, commit_on_exception)
