@@ -10,6 +10,8 @@ from models.raw_patient import RawPatient
 from models.raw_allergy_row import RawAllergyRow
 from models.raw_allergy import RawAllergy
 
+from settings import settings
+
 def process_and_store_data():
     raw_conn = None
     refined_conn = None
@@ -18,18 +20,18 @@ def process_and_store_data():
     try:
         # Connect to both databases
         raw_conn = psycopg2.connect(
-            dbname=os.getenv('RAW_DB_NAME', 'raw_data'),
-            user=os.getenv('RAW_DB_USER', 'postgres'),
-            password=os.getenv('RAW_DB_PASSWORD', 'postgres'),
-            host=os.getenv('RAW_DB_HOST', 'raw_db'),
-            port=os.getenv('RAW_DB_PORT', '5432')
+            dbname=settings.RAW_DB_NAME,
+            user=settings.RAW_DB_USER,
+            password=settings.RAW_DB_PASSWORD,
+            host=settings.RAW_DB_HOST,
+            port=settings.RAW_DB_PORT
         )
         refined_conn = psycopg2.connect(
-            dbname=os.getenv('REFINED_DB_NAME', 'refined_data'),
-            user=os.getenv('REFINED_DB_USER', 'postgres'),
-            password=os.getenv('REFINED_DB_PASSWORD', 'postgres'),
-            host=os.getenv('REFINED_DB_HOST', 'refined_db'),
-            port=os.getenv('REFINED_DB_PORT', '5432')
+            dbname=settings.REFINED_DB_NAME,
+            user=settings.REFINED_DB_USER,
+            password=settings.REFINED_DB_PASSWORD,
+            host=settings.REFINED_DB_HOST,
+            port=settings.REFINED_DB_PORT
         )
         raw_cur = raw_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         refined_cur = refined_conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -98,9 +100,6 @@ def process_and_store_data():
             allergy_models_batch = []
             for row in allergies[offset:offset + batch_size]:
                 try:
-                    print("instantiating allergy")
-                    raw_allergy = RawAllergy(**row['data'])
-                    print("Allergy instantitated")
                     raw_allergy_row = RawAllergyRow(
                         id=row['id'],
                         data=RawAllergy(**row['data']),

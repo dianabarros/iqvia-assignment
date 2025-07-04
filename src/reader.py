@@ -5,17 +5,19 @@ import psycopg2.extras
 import os
 from datetime import datetime
 
+from settings import settings
+
 def read_and_store_data():
     # Connect to PostgreSQL for data history
     conn = None
     cur = None
     try:
         conn = psycopg2.connect(
-            dbname=os.getenv('RAW_DB_NAME', 'raw_data'),
-            user=os.getenv('RAW_DB_USER', 'postgres'),
-            password=os.getenv('RAW_DB_PASSWORD', 'postgres'),
-            host=os.getenv('RAW_DB_HOST', 'raw_db'),
-            port=os.getenv('RAW_DB_PORT', '5432')
+            dbname=settings.RAW_DB_NAME,
+            user=os.settings.RAW_DB_USER,
+            password=settings.RAW_DB_PASSWORD,
+            host=os.settings.RAW_DB_HOST,
+            port=settings.RAW_DB_PORT
         )
         cur = conn.cursor()
         # Start transaction

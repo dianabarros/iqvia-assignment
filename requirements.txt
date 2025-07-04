@@ -3,3 +3,6 @@ python-dotenv==1.0.0
 ndjson==0.3.1
 pydantic==2.11.7
 pydantic_core==2.33.2
+greenlet==3.2.3 
+sqlalchemy==2.0.41
+pydantic-settings-2.10.1
