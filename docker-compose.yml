@@ -51,12 +51,8 @@ services:
     depends_on:
       raw_db:
         condition: service_healthy
-    environment:
-      - RAW_DB_NAME=raw_data
-      - RAW_DB_USER=postgres
-      - RAW_DB_PASSWORD=postgres
-      - RAW_DB_HOST=raw_db
-      - RAW_DB_PORT=5432
+    env_file:
+      - .env
 
   handler:
     build: .
@@ -68,17 +64,8 @@ services:
         condition: service_healthy
       reader:
         condition: service_completed_successfully
-    environment:
-      - RAW_DB_NAME=raw_data
-      - RAW_DB_USER=postgres
-      - RAW_DB_PASSWORD=postgres
-      - RAW_DB_HOST=raw_db
-      - RAW_DB_PORT=5432
-      - REFINED_DB_NAME=refined_data
-      - REFINED_DB_USER=postgres
-      - REFINED_DB_PASSWORD=postgres
-      - REFINED_DB_HOST=refined_db
-      - REFINED_DB_PORT=5432
+    env_file:
+      - .env
 
 volumes:
   raw_data:
