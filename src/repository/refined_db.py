@@ -14,5 +14,5 @@ sessionmaker = SessionDatabase(
 )
 
 @contextmanager
-def get_refined_db_session(commit_on_exception: bool = False):
+def get_refined_db_session_context(commit_on_exception: bool = False):
     return get_db_session(sessionmaker, commit_on_exception)

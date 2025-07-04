@@ -15,7 +15,7 @@ class AllergyCodes(RefinedBase):
     system = Column(String, nullable=False)
     code = Column(String, nullable=False)
     display = Column(String, nullable=False)
-    events = relationship("AllergyEvent", back_populates="code_rel")
+    events = relationship("AllergyEvents", back_populates="code_rel")
 
 class AllergyEvents(RefinedBase):
     __tablename__ = "allergy_events"
@@ -26,6 +26,6 @@ class AllergyEvents(RefinedBase):
     code_id = Column(Integer, ForeignKey("allergy_codes.id"), nullable=False)
     recorded_date = Column(DateTime, nullable=False)
     created_at = Column(DateTime, nullable=False)
-    code_rel = relationship("AllergyCode", back_populates="events")
+    code_rel = relationship("AllergyCodes", back_populates="events")
 
         

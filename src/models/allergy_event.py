@@ -9,6 +9,7 @@ class AllergyCategory(str, Enum):
     PET_ALLERGY = "pet_allergy"
     ENVIRONMENT = "environment"
 
+
 class AllergyEventSchema(BaseModel):
     uuid: UUID
     patient_uuid: UUID
@@ -23,15 +24,24 @@ class AllergyEventSchema(BaseModel):
     @field_validator('category', mode='before')
     @classmethod
     def validate_category(cls, v, info):
+        category_mapping = {
+            "food": AllergyCategory.FOOD,
+            "pet_allergy": AllergyCategory.PET_ALLERGY,
+            "pet allergies": AllergyCategory.PET_ALLERGY,
+            "environment": AllergyCategory.ENVIRONMENT,
+            "environmental": AllergyCategory.ENVIRONMENT
+        }
         if isinstance(v, list):
             if len(v) == 0:
                 return None
-            if len(v) == 1 and isinstance(v[0], str):
-                if v[0] == "" or v[0] is None:
+            if len(v) == 1:
+                if isinstance(v[0], str):
+                    if v[0] == "":
+                        return None
+                    v = v[0].lower().strip()
+                    return category_mapping.get(v)
+                if v[0] is None:
                     return None
-                v = v[0].lower().strip()
-                if v == "environmental":
-                    return AllergyCategory.ENVIRONMENT
         return v
     
     @field_validator('patient_uuid', mode='before')

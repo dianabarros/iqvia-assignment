@@ -118,7 +118,9 @@ def main():
                     print(f"Skipping malformed allergy {row['id']} row: {e}")
                     continue
 
-                # allergy_processor.process_allergies(allergy_models_batch)
+            success, err = allergy_processor.process_allergies(allergy_models_batch)
+            if not success:
+                print("Data malformed")
                     # TODO: transform
                     # TODO: insert into refined table
                     # TODO: update ack status in raw table
