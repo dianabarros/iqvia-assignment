@@ -3,14 +3,13 @@ from pydantic import BaseModel
 from uuid import UUID
 
 class Telecom(BaseModel):
-    id: int
     patient_uuid: UUID
     system: str
     value: str
     use: str
 
     class Config:
-        extra = "forbid"  # Disallow extra fields not defined in the model
+        extra = "forbid"
 
     @property
     def is_email(self) -> bool:

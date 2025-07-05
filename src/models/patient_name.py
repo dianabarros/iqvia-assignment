@@ -3,7 +3,6 @@ from pydantic import BaseModel, model_validator, field_validator
 from uuid import UUID
 
 class PatientName(BaseModel):
-    id: int
     patient_uuid: UUID
     use: str
     family: str

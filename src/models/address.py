@@ -3,7 +3,6 @@ from pydantic import BaseModel, model_validator
 from uuid import UUID
 
 class Address(BaseModel):
-    id: int
     patient_uuid: UUID
     line: list[str]
     city: str

@@ -11,8 +11,8 @@ class Gender(str, Enum):
 class Patient(BaseModel):
     id: int
     uuid: UUID
-    name_id: int
-    address_id: int
-    telecom_id: int
+    name_id: Optional[int] = None
+    address_id: Optional[int] = None
+    telecom_id: Optional[int] = None
     birth_date: date
     gender: Gender

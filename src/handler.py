@@ -9,8 +9,9 @@ from models.raw_patient_row import RawPatientRow
 from models.raw_patient import RawPatient
 from models.raw_allergy_row import RawAllergyRow
 from models.raw_allergy import RawAllergy
-from processing.raw_updater import RawAllergyUpdater
+from processing.raw_updater import RawAllergyUpdater, RawPatientUpdater
 from processing.refining_allergy import AllergyProcessor
+from processing.refining_patients import PatientProcessor
 from repository.database import get_sync_session_context
 from repository.refined_db import sessionmaker as refined_sessionmaker
 from repository.raw_db import sessionmaker as raw_sessionmaker
@@ -47,6 +48,8 @@ def main():
 
     raw_allergy_updater = RawAllergyUpdater()
     allergy_processor = AllergyProcessor()
+    raw_patient_updater = RawPatientUpdater()
+    patient_processor = PatientProcessor()
 
     # Process patients
     raw_cur.execute('SELECT id, data, ack, created_at FROM patients WHERE ack = false;')
@@ -121,7 +124,53 @@ def main():
         except Exception as e:
             print(f"Batch processing failed from id {allergy_models_rows_batch[0].id} to id {allergy_models_rows_batch[len(allergy_models_rows_batch)-1].id}: {e}")
                  
-                           
+    raw_cur.execute('SELECT id, data, ack, created_at FROM patients WHERE ack = false ORDER BY id ASC;')
+    patients = raw_cur.fetchall()
+    if not patients:
+        print("No new patient data to process.")
+        # TODO
+    batch_size = 1000  # TODO Define a batch size for processing
+    for offset in range(0, len(patients), batch_size):
+        patient_models_rows_batch = []
+        patient_models_batch = []
+        for row in patients[offset:offset + batch_size]:
+            try:
+                raw_patient = RawPatient(**row['data'])
+                raw_patient_row = RawPatientRow(
+                    id=row['id'],
+                    data=raw_patient,
+                    ack=row['ack'],
+                    created_at=row['created_at']
+                )
+                patient_models_rows_batch.append(raw_patient_row)
+                patient_models_batch.append(raw_patient)
+                print(f"Processing patient: {raw_patient_row.id}")
+            except Exception as e:
+                print(f"Skipping malformed patient {row['id']} row: {e}")
+                continue
+
+        try:
+            with get_sync_session_context(raw_db_sessionmaker, refined_db_sessionmaker) as (raw_db, refined_db):
+                success, err = patient_processor.process_patients(refined_db, patient_models_batch)
+                ids_not_acked = []
+                to_ack = []
+                if not success:
+                    print("Some data were malformed")
+                    for malformed_patient in err['failed_patients']:
+                        ids_not_acked.append(malformed_patient[0])
+                    for malformed_name in err['failed_names']:
+                        ids_not_acked.append(malformed_name[0])
+                    for malformed_address in err['failed_addresses']:
+                        ids_not_acked.append(malformed_address[0])
+                    for malformed_telecom in err['failed_telecoms']:
+                        ids_not_acked.append(malformed_telecom[0])
+                for row in patient_models_rows_batch:
+                    if row.data.id not in ids_not_acked:
+                        to_ack.append(row.id)
+                raw_patient_updater.batch_ack_patients(raw_db, to_ack)
+        except Exception as e:
+            print(f"Batch processing failed from id {patient_models_rows_batch[0].id} to id {patient_models_rows_batch[len(patient_models_rows_batch)-1].id}: {e}")
+    
 
 if __name__ == '__main__':
     main()
