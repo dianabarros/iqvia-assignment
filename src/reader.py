@@ -50,6 +50,7 @@ def read_and_store_data():
                 if not line:
                     continue
                 try:
+                    line = line.replace(":,",":null,")
                     patient = json.loads(line)
                     cur.execute('INSERT INTO patients (data, created_at) VALUES (%s,%s);', [psycopg2.extras.Json(patient), datetime.now()])
                 except Exception as e:
@@ -62,6 +63,7 @@ def read_and_store_data():
                 if not line:
                     continue
                 try:
+                    line = line.replace('":,"','":null,"').replace('":}', '":null}')
                     allergy = json.loads(line)
                     cur.execute('INSERT INTO allergies (data, created_at) VALUES (%s,%s);', [psycopg2.extras.Json(allergy), datetime.now()])
                 except Exception as e:

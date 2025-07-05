@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from datetime import datetime
 from sqlalchemy import tuple_
 from uuid import UUID
@@ -8,19 +8,18 @@ from models.raw_allergy import RawAllergy
 from models.allergy_event import AllergyEventSchema
 from models.allergy_code import AllergyCodeSchema
 from models.tables.allergy_refined_tables import AllergyCodes, AllergyEvents
-from repository.refined_db import sessionmaker
+from repository.database import SessionDatabase
 
 
 class AllergyProcessor:
     @staticmethod
-    def process_allergies(allergy_rows: List[RawAllergy]) -> None:
+    def process_allergies(session: SessionDatabase, allergy_rows: List[RawAllergy]) -> Tuple[bool, dict]:
         """
         Process a RawAllergy instance and return an AllergyRefinedTables instance.
         
         :param allergy_row: An instance of RawAllergy containing the raw allergy data.
         :return: An instance of AllergyRefinedTables with processed allergy data.
         """
-        session = sessionmaker.session()
         failed_allergy_code = []
         failed_allergy_event = []
         code_keys = set()
@@ -29,7 +28,7 @@ class AllergyProcessor:
                 coding = AllergyCodeSchema(**allergy_row.code.coding[0].model_dump())
             except Exception as e:
                 print("Got an allergy coding schema incompatibility")
-                failed_allergy_code.append((allergy_row.code.coding[0], str(e)))
+                failed_allergy_code.append((allergy_row.id, "Coding schema incompatibility: " + str(e)))
                 continue
             code_keys.add((coding.code, coding.system, coding.display))
 
@@ -47,7 +46,6 @@ class AllergyProcessor:
         ]
         if new_code_objs:
             session.bulk_save_objects(new_code_objs)
-            session.commit()
 
         all_codes = session.query(AllergyCodes).filter(
             tuple_(AllergyCodes.code, AllergyCodes.system, AllergyCodes.display).in_(code_keys)
@@ -76,7 +74,7 @@ class AllergyProcessor:
                 except Exception as e:
                     print(f"Got an allergy event schema incompatibility for uuid {allergy_row.id}")
                     print(e)
-                    failed_allergy_event.append((allergy_row, str(e)))
+                    failed_allergy_event.append((allergy_row.id, "Allergy event schema incompatibility: " + str(e)))
                     continue
                 allergy_event = AllergyEvents(
                     **allergy_event_schema.model_dump(),
@@ -85,7 +83,6 @@ class AllergyProcessor:
                 allergy_events.append(allergy_event)
 
         session.bulk_save_objects(allergy_events)
-        session.commit()
         
         all_data_success = len(failed_allergy_code) == 0 and len(failed_allergy_event) == 0
         return all_data_success, {
