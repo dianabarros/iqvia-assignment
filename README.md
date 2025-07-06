@@ -23,6 +23,6 @@ We have a handler entity, here represented as a python script, that checks the r
 Due to the time for modeling and developing, there are certainly improvements to be done:
 - tests should be more assertive and there should be more tests
 - error handling should be more purposeful and informative
-- code could be more modular to help debugging in the future and reusable
+- code could be more modular to help debugging in the future and reusability
 - some variables could be parametrized so the processing could be adjusted in a easier way
 - the modeling was done considering the sample received, it would be needed more knowledge about the source data and how it would be used for a better modelling
