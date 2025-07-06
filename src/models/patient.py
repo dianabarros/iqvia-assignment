@@ -9,10 +9,6 @@ class Gender(str, Enum):
     MALE = "male"
 
 class Patient(BaseModel):
-    id: int
     uuid: UUID
-    name_id: Optional[int] = None
-    address_id: Optional[int] = None
-    telecom_id: Optional[int] = None
     birth_date: date
     gender: Gender
