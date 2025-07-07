@@ -16,7 +16,7 @@ Run:
 
 This solution is a simplification of a pipeline, where we have a reader entity, here being a python script reader.py that reads the provided NDJSON files and insert its content in a Postgres database for raw data. This reader entity should be a representation of a tool that would be constantly receiving messages and uploading them to the database. As we are persisting it in a RDB, we have an `ack` column that will assure the row is not read by the handler more than once.
 
-We have a handler entity, here represented as a python script, that checks the raw data RDS, checks the unacked rows, processes them and input them to a refined Postgres database as the model below
+We have a handler entity, here represented as a python script, that checks the raw data RDS, checks the unacked rows, processes them and input them to a refined Postgres database as the model below. This entity represents a tool that could be scheduled to catch new data from the raw database in a certain frequency.
 
 ![models](https://github.com/dianabarros/iqvia-assignment/blob/f320297843ee81f1761f83d039c4e0f9d0fba6e2/models.png)
 
