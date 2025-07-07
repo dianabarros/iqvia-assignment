@@ -1,7 +1,7 @@
 install-deps:
 	pip3 install -r requirements.txt
 
-up: install-deps
+up:
 	docker-compose down --remove-orphans
 	docker volume rm iqvia-assignment_raw_data || true
 	docker volume rm iqvia-assignment_refined_data || true
@@ -12,7 +12,7 @@ down:
 	docker volume rm iqvia-assignment_raw_data || true
 	docker volume rm iqvia-assignment_refined_data || true
 
-test:
+test: install-deps
 	docker-compose down
 	docker volume rm iqvia-assignment_raw_data || true
 	docker volume rm iqvia-assignment_refined_data || true
